@@ -2,7 +2,6 @@
 import axios from "axios"
 // 引入进度条
 import nprogress from "nprogress";
-console.log(nprogress);
 // 引入进度条样式
 import "nprogress/nprogress.css"
 // 1.利用axios对象的方法create，去创建一个axios实例

@@ -14,8 +14,14 @@ export default {
     Header,
     Footer,
   },
+  mounted(){
+    // 通知Vuex发请求，获取数据，储存于仓库当中
+    this.$store.dispatch('categoryList')
+  }
 };
 </script>
 <style lang="less" scoped>
 /* @import url(); 引入css类 */
+// 重置样式
+
 </style>
