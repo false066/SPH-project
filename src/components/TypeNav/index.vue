@@ -131,7 +131,7 @@ export default {
           locations.query.category3Id = category3id;
         }
         //点击商品分类按钮的时候,如果路径当中携带params参数,需要合并携带给search模块
-        if (this.$route.params.keywords) {
+        if (this.$route.params.s) {
           locations.params = this.$route.params;
         }
         //目前商品分类这里携带参数只有query参数

@@ -11,38 +11,34 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
-            <li class="with-x">手机</li>
-            <li class="with-x">iphone<i>×</i></li>
-            <li class="with-x">华为<i>×</i></li>
-            <li class="with-x">OPPO<i>×</i></li>
+            <li class="with-x" v-if="searchParams.categoryName">{{ searchParams.categoryName }}<i
+                @click="removeCategoryName">×</i></li>
+            <li class="with-x" v-if="searchParams.keywords">{{ searchParams.keywords }}<i @click="removeKeywords">×</i>
+            </li>
+            <li class="with-x" v-if="searchParams.trademark">{{ searchParams.trademark.split(":")[1] }}<i
+                @click="removeTradeMark">×</i>
+            </li>
+            <li class="with-x" v-for="(item, index) in searchParams.props" :key="index">{{ item.split(":")[1] }}<i
+                @click="removeProps(index)">×</i>
+            </li>
           </ul>
         </div>
 
         <!--selector-->
-        <SearchSelector />
+        <SearchSelector @tradeMarkInfo="tradeMarkInfo" @attrInfo="attrInfo" />
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{ active: isOne }" @click="changeOrder('1')">
+                  <a href="#">综合<span v-show="isOne" class="iconfont"
+                      :class="{ 'icon-jiantou_xiangshang': isAsc, 'icon-jiantou_xiangxia': isDesc }"></span></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{ active: isTwo }" @click="changeOrder('2')">
+                  <a href="#">价格<span v-show="isTwo" class="iconfont"
+                      :class="{ 'icon-jiantou_xiangshang': isAsc, 'icon-jiantou_xiangxia': isDesc }"></span></a>
                 </li>
               </ul>
             </div>
@@ -52,7 +48,7 @@
               <li class="yui3-u-1-5" v-for="item in goodsList" :key="item.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank"><img :src="item.defaultImg" /></a>
+                   <router-link :to="`/detail/${item.id}`"><img :src="item.defaultImg" /></router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -61,7 +57,7 @@
                     </strong>
                   </div>
                   <div class="attr">
-                    <a target="_blank" href="item.html" title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】">{{ item.title }}</a>
+                    <a target="_blank" href="item.html" :title="item.title">{{ item.title }}</a>
                   </div>
                   <div class="commit">
                     <i class="command">已有<span>{{ item.id }}</span>人评价</i>
@@ -74,35 +70,9 @@
               </li>
             </ul>
           </div>
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+          <Pagination
+          :pageNo="searchParams.pageNo" :pageSize="searchParams.pageSize" :total="total" @getPageNo="getPageNo" :continues="5"
+          ></Pagination>
         </div>
       </div>
     </div>
@@ -111,33 +81,33 @@
 
 <script>
 import SearchSelector from './SearchSelector/SearchSelector'
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 export default {
   name: 'Search',
-  data(){
-    return{
+  data() {
+    return {
       // 带给服务器参数
-      searchParams:{
+      searchParams: {
         // 一级分类id
-        category1Id:"",
+        category1Id: "",
         // 二级分类id
-        category2Id:"",
+        category2Id: "",
         // 三级分类id
-        category3Id:"",
+        category3Id: "",
         // 分类名字
-        categoryName:"",
+        categoryName: "",
         // 关键字
-        keywords:"",
-        // 排序
-        order:"",
+        keywords: "",
+        // 排序:初始状态应该是综合|降序
+        order: "1:desc",
         // 分页器用的：代表当前是第几页
-        pageNo:1,
+        pageNo: 1,
         // 代表每一页展示数据个数
-        pageSize:3,
+        pageSize: 10,
         // 平台售卖属性操作带的参数
-        props:[],
+        props: [],
         // 品牌
-        trademark:""
+        trademark: ""
       }
     }
   },
@@ -145,7 +115,7 @@ export default {
     SearchSelector
   },
   //当组件挂载之前执行一次【先于mounted之前】
-  beforeMount(){
+  beforeMount() {
     // 复杂写法
     // this.searchParams.category1Id = this.$route.query.category1Id
     // this.searchParams.category2Id = this.$route.query.category2Id
@@ -153,7 +123,9 @@ export default {
     // this.searchParams.categoryName = this.$route.query.categoryName
     // this.searchParams.keywords = this.$route.params.keywords
     // Object.assign ES6新增语法，合并对象
+    // 在发请求之前，把接口需要传递的参数，进行整理（在给服务器发请求之前，把参数整理好，服务器就会返回查询的数据）
     Object.assign(this.searchParams, this.$route.query, this.$route.params);
+    // console.log(this.searchParams);
   },
   // 组件挂载完毕执行一次，【仅仅执行一次】
   mounted() {
@@ -162,13 +134,126 @@ export default {
   },
   computed: {
     // mapGetters里面的写法：传递的数组，因为getters计算是没有划分模块【home，search】
-    ...mapGetters(['goodsList'])
+    ...mapGetters(['goodsList']),
+    ...mapState({
+            // 右侧需要的是一个函数,当使用这个计算属性的时候,右侧的函数会立即执行一次
+            // 注入一个参数state,其实即为大仓库中的数据
+            total: (state) => {
+                return state.search.searchList.total
+            }
+        }),
+    isOne() {
+      return this.searchParams.order.indexOf('1') != -1
+    },
+    isTwo() {
+      return this.searchParams.order.indexOf("2") != -1
+    },
+    isDesc() {
+      return this.searchParams.order.indexOf("desc") != -1;
+    },
+    isAsc() {
+      return this.searchParams.order.indexOf("asc") != -1;
+    },
   },
-  methods:{
+  methods: {
     // 向服务器发请求获取search模块数据（根据参数不同返回不同的数组进行展示）
     // 把这次请求封装成一个函数：当你需要在调用的时候调用即可
-    getData(){
-      this.$store.dispatch('getSearchList', this.searchParams)
+    getData() {
+      this.$store.dispatch("getSearchList", this.searchParams);
+      // console.log(this.searchParams);
+    },
+    // 删除分类名字
+    removeCategoryName() {
+      // 把服务器的参数置空了，还需要向服务器发送请求
+      // 带给服务器的参数说明可有可无的：如果属性值为空的字符串还是会把相应的字段带给服务器
+      // 但是你把相应的字段变为undifined，当前这个字段不会带给服务器
+      this.searchParams.categoryName = undefined
+      this.searchParams.category1Id = undefined
+      this.searchParams.category2Id = undefined
+      this.searchParams.category3Id = undefined
+      this.getData()
+      // 地址栏也需要修改：进行路由跳转
+      //严谨：本意是删除query，如果路径当中出现params，路由跳转应该带着
+      if (this.$route.params) {
+        this.$router.push({ name: 'search', params: this.$route.params })
+      }
+    },
+    // 删除关键字
+    removeKeywords() {
+      this.searchParams.keywords = undefined
+      this.getData()
+      // 通知兄弟组件Header清除关键字
+      this.$bus.$emit("clear")
+      // 进行路由跳转
+      if (this.$route.query) {
+        this.$router.push({ name: 'search', query: this.$route.query })
+      }
+    },
+    // 删除品牌
+    removeTradeMark() {
+      this.searchParams.trademark = undefined
+      this.getData()
+    },
+    // 删除属性值
+    removeProps(index) {
+      // 删除选中的面包屑
+      this.searchParams.props.splice(index, 1)
+      // 再次发送请求
+      this.getData()
+    },
+    // 自定义事件的回调
+    tradeMarkInfo(trademark) {
+      // 1.整理品牌字段的参数"ID:品牌名称"
+      this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`
+      this.getData()
+    },
+    //属性自定义事件回调
+    attrInfo(attr, attrValue) {
+      // console.log("1111111",attrValue);
+      const props = `${attr.attrId}:${attrValue}:${attr.attrName}`
+      // 数组去重
+      // if语句如果只有一行代码可以省略大花括号
+      if (this.searchParams.props.indexOf(props) == -1) this.searchParams.props.push(props)
+      this.getData()
+    },
+    // 排序操作
+    changeOrder(flag){
+      // flag形参：它是一个标记，代表用户点击的是综合（1）价格（2）[用户点击的时候传递过来的]
+      // let originOrder = this.searchParams.order;
+      // 这里获取的是最开始的状态
+      let originFlag = this.searchParams.order.split(':')[0]
+      let originSort = this.searchParams.order.split(':')[1]
+      // 准备一个新的order属性值
+      let newOrder = ''
+      // 点击的是综合
+      if(flag === originFlag){
+        newOrder = `${originFlag}:${originSort === "desc"? "asc ": "desc"}`
+      }else{
+        // 点击的是价格
+        newOrder = `${flag}:${'desc'}`
+      }
+      this.searchParams.order = newOrder
+      this.getData()
+    },
+    // 自定义事件的回调函数---获取当前第几页
+    getPageNo(pageNo) {
+      //父组件整理参数
+      this.searchParams.pageNo = pageNo;
+       this.getData();
+    },
+  },
+  // 数据监听：监听组件实例上的属性的属性值变化
+  watch: {
+    // 监听路由的信息是否发生变化，如果发生变化，再次发起请求
+    $route(newValue, oldValue) {
+      // 再次发请求之前整理带给服务器参数
+      Object.assign(this.searchParams, this.$route.query, this.$route.params)
+      // 再次发起Ajax请求
+      this.getData()
+      //每一次请求完毕，应该把相应的1、2、3级分类的id置空，让他们接收下一次相应的1、2、3id
+      this.searchParams.category1Id = undefined
+      this.searchParams.category2Id = undefined
+      this.searchParams.category3Id = undefined
     }
   }
 }
@@ -423,85 +508,6 @@ export default {
         overflow: hidden;
         float: right;
 
-        .sui-pagination {
-          margin: 18px 0;
-
-          ul {
-            margin-left: 0;
-            margin-bottom: 0;
-            vertical-align: middle;
-            width: 490px;
-            float: left;
-
-            li {
-              line-height: 18px;
-              display: inline-block;
-
-              a {
-                position: relative;
-                float: left;
-                line-height: 18px;
-                text-decoration: none;
-                background-color: #fff;
-                border: 1px solid #e0e9ee;
-                margin-left: -1px;
-                font-size: 14px;
-                padding: 9px 18px;
-                color: #333;
-              }
-
-              &.active {
-                a {
-                  background-color: #fff;
-                  color: #e1251b;
-                  border-color: #fff;
-                  cursor: default;
-                }
-              }
-
-              &.prev {
-                a {
-                  background-color: #fafafa;
-                }
-              }
-
-              &.disabled {
-                a {
-                  color: #999;
-                  cursor: default;
-                }
-              }
-
-              &.dotted {
-                span {
-                  margin-left: -1px;
-                  position: relative;
-                  float: left;
-                  line-height: 18px;
-                  text-decoration: none;
-                  background-color: #fff;
-                  font-size: 14px;
-                  border: 0;
-                  padding: 9px 18px;
-                  color: #333;
-                }
-              }
-
-              &.next {
-                a {
-                  background-color: #fafafa;
-                }
-              }
-            }
-          }
-
-          div {
-            color: #333;
-            font-size: 14px;
-            float: right;
-            width: 241px;
-          }
-        }
       }
     }
   }

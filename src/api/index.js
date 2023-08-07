@@ -29,7 +29,7 @@ export const reqFloorList = () => {
 {
   "category3Id": "61",
   "categoryName": "手机",
-  "keyword": "小米",
+  "keywords": "小米",
   "order": "1:desc",
   "pageNo": 1,
   "pageSize": 10,
@@ -39,10 +39,25 @@ export const reqFloorList = () => {
 */
 // 当前这个函数需不需要接收外部参数
 // 当前这个接口（获取搜索模块的数据），给服务器传递一个默认的参数【至少是一个空对象】
-export const reqGetSearchInfo = (params) =>{
+export const reqGetSearchInfo = (data) =>{
   return requests({
     url:'/list',
     method:'POST',
-    data:params
+    data,
+  })
+}
+
+// 获取产品信息详情的接口 URL：/api/item/{ skuId }  请求方式：Get 参数：需要参数
+export const reqGoodsInfo = (skuId) =>{
+  return requests({
+    url:`/item/${ skuId }`,
+  })
+}
+
+//添加到购物车 URL： /api/cart/addToCart/{ skuId }/{ skuNum } 请求方式：POST 参数：需要参数
+export const reqAddOrUpdateShopCart = ({skuId, skuNum}) =>{
+  return requests({
+    url:`/cart/addToCart/${ skuId }/${ skuNum }`,
+    method:"POST",
   })
 }

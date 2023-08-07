@@ -1,15 +1,10 @@
 //配置路由的地方
 import Vue from "vue";
 import VueRouter from "vue-router";
-
+import routes from "./routes";
 // 使用插件
 Vue.use(VueRouter)
-// 引入路由组件
-import Home from "@/views/Home/index.vue"
-import Login from "@/views/Login/index.vue"
-import Register from "@/views/Register/index.vue"
-import Search from "@/views/Search/index.vue"
-import NotFound from '@/views/notfound/NotFound.vue'
+
 
 // 先把VueRouter原型对象的push，先保存一份
 let originPush = VueRouter.prototype.push
@@ -45,51 +40,10 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
 export default new VueRouter({
   // 配置路由
   
-  routes: [
-    {
-      path:'/home',
-      component:Home,
-      meta:{show:true}
-    },
-    {
-      path:'/login',
-      component:Login,
-      meta:{show:false}
-    },
-    {
-      path:'/register',
-      component:Register,
-      meta:{show:false}
-
-    },
-    {
-      path:'/search/:keywords?',
-      name:'search',
-      component:Search,
-      meta:{show:true},
-      // 路由组件能不能传递props数据
-      // 布尔值写法
-      // props:true
-      // 对象写法：额外的给路由组件传递一些props
-      // props:{a:1,b:2}
-      // 函数写法：可以传递params参数和query参数，通过props传递给路由组件
-      // props:($route) =>{
-      //   return{
-      //     keywords:$route.params.keywords,
-      //     k:$route.query.k
-      //   }
-      // }
-    },
-    // 重定向：在项目跑起来的时候，访问、，立马跳转到首页
-    {
-      path:'/',
-      redirect:'/home'
-    },
-    { // 404 页面
-      path:"/:pathMatch(.*)*",// 官网写法
-      name:"Notfound",
-      component:NotFound,
-      meta:{show:true}
+  routes,
+  // 滚动行为
+  scrollBehavior (to, from, savedPosition) {
+    // 返回的y代表到滚动条最顶端
+    return { y: 0 }
   }
-  ]
 })

@@ -13,10 +13,11 @@ const mutations = {
 // action:处理action，可以书写自己的业务逻辑，也可以处理异步
 const actions = {
   // 获取search模块数据
-  async getSearchList({commit},params={}){
+  async getSearchList({commit},searchParams){
     // 当前这个reqGetSearchInfo这个函数在调用获取服务器数据的时候，至少传递一个参数（空对象）
     // params形参：是当用户触发action的时候，第二个参数传过来的，至少是一个空对象
-    const res = await reqGetSearchInfo(params)
+    const res = await reqGetSearchInfo(searchParams)
+    // console.log(res);
     if(res.code === 200){
       commit('GETSEARCHLIST',res.data)
     }
@@ -32,13 +33,13 @@ const getters = {
     // state.searchList.goodsList 如果服务器数据回来了，没问题是一个数组
     // 假如网络不给力或者是没有网络，state.searchList.goodsList应该返回的是undifined
     // 
-    return state.searchList.goodsList || []
+    return state.searchList.goodsList
   },
   trademarkList(state){
-    return state.searchList.trademarkList || []
+    return state.searchList.trademarkList
   },
   attrsList(state){
-    return state.searchList.attrsList || []
+    return state.searchList.attrsList
   }
 }
 

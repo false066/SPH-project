@@ -62,7 +62,7 @@ export default {
                 params: { keywords: this.keywords || undefined },
             };
             //确定路径当中有query参数
-            if (this.$route.query) {
+            if (this.$route.query.categoryName) {
                 locations.query = this.$route.query;
             }
 
@@ -86,6 +86,12 @@ export default {
         // })
 
 
+    },
+    mounted() {
+        // 通过全局事件总线清楚关键字
+        this.$bus.$on("clear",() =>{
+            this.keywords = ''
+        })
     }
 }
 </script>
