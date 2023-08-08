@@ -16,7 +16,7 @@
         <!-- 左侧放大镜区域 -->
         <div class="previewWrap">
           <!--放大镜效果-->
-          <Zoom :skuImageList="skuImageList" :skuDefaultImg="skuInfo.skuDefaultImg" />
+          <Zoom :skuImageList="skuImageList" />
           <!-- 小图列表 -->
           <ImageList :skuImageList="skuImageList" />
         </div>
@@ -67,14 +67,15 @@
               <div class="choosed"></div>
               <dl v-for="item in spuSaleAttrList" :key="item.id">
                 <dt class="title">{{ item.saleAttrName }}</dt>
-                <dd changepirce="0" :class="{ active: i.isChecked == 1 }" v-for=" (i, index ) in item.spuSaleAttrValueList"
-                  :key="i.id" @click="changeActive(i, item.spuSaleAttrValueList)">{{i.saleAttrValueName }}</dd>
+                <dd changepirce="0" :class="{ active: i.isChecked == 1 }"
+                  v-for=" (i, index ) in item.spuSaleAttrValueList" :key="i.id"
+                  @click="changeActive(i, item.spuSaleAttrValueList,)">{{ i.saleAttrValueName }}</dd>
 
               </dl>
             </div>
             <div class="cartWrap">
               <div class="controls">
-                <input autocomplete="off" class="itxt"  v-model="skuNum" @change="changeSkuNum">
+                <input autocomplete="off" class="itxt" v-model="skuNum" @change="changeSkuNum">
                 <a href="javascript:" class="plus" @click="skuNum++">+</a>
                 <a href="javascript:" class="mins" @click="skuNum > 1 ? skuNum-- : 1">-</a>
               </div>
@@ -337,9 +338,13 @@ import Zoom from './Zoom/Zoom'
 import { mapGetters } from 'vuex'
 export default {
   name: 'Detail',
-  data(){
-    return{
-      skuNum:1
+  data() {
+    return {
+      skuNum: 1,
+      attr: {
+        color: '',
+        version: ''
+      }
     }
   },
   components: {
@@ -357,18 +362,36 @@ export default {
     skuImageList() {
       return this.skuInfo.skuImageList || []
     },
-    skuDefaultImg() {
-      return this.skuInfo.skuDefaultImg || ''
+    spuSaleAttrColor(){
+      return this.spuSaleAttrList[0] != null ||undefined ? this.spuSaleAttrList[0].spuSaleAttrValueList : []
     },
-
+    attrColor(){
+     return  this.spuSaleAttrColor.filter(item => item.isChecked == 1)[0] != null || 
+     undefined ? this.spuSaleAttrColor.filter(item => item.isChecked == 1)[0].saleAttrValueName : "无"
+    },
+    spuSaleAttrVersion(){
+      return this.spuSaleAttrList[1]!= null || undefined ? this.spuSaleAttrList[1].spuSaleAttrValueList : []
+    },
+    attrVersion(){
+     return this.spuSaleAttrVersion.filter(item => item.isChecked == 1)[0] != null || 
+     undefined ? this.spuSaleAttrVersion.filter(item => item.isChecked == 1)[0].saleAttrValueName : "无"
+    }
   },
-  methods:{
+  methods: {
     // 产品售卖属性值切换高亮
-    changeActive(saleAttrValue,arr){
+    changeActive(saleAttrValue, arr) {
       // console.log(arr);
       // console.log(saleAttrValue);
+      if (saleAttrValue.baseSaleAttrId === 1 ) {
+        const color = saleAttrValue.saleAttrValueName
+        this.attr.color = color;
+      } else {
+        const version = saleAttrValue.saleAttrValueName
+        this.attr.version = version
+      }
+
       // 遍历全部售卖属性值isChecked为零没有高亮
-      arr.forEach( item => {
+      arr.forEach(item => {
         item.isChecked = 0;
       });
       // 点击的那个售卖属性值
@@ -376,25 +399,43 @@ export default {
 
     },
     // 修改产品数量
-    changeSkuNum(event){
+    changeSkuNum(event) {
       // 用户输入进来的文本*1
       let value = event.target.value * 1
       // 如果用户输入进来的非法
-      if(isNaN(value) || value < 1){
+      if (isNaN(value) || value < 1) {
         this.skuNum = 1;
-      }else{
+      } else {
         this.skuNum = parseInt(value)
       }
     },
     // 加入购物车的回调函数
-    addShopCar(){
+    async addShopCar() {
       // 1.发请求----将产品加入到数据库（通知服务器）
       // 当前这里是派发了一个action，也向服务器发请求，判断加入购物车是成功还是失败，进行相应的操作
       // this.$store.dispatch('addOrUpdateShopCart',{skuId:this.$route.params.skuid,skuNum:this.skuNum})
       // 上面这行代码说白了：调用仓库中的addOrUpdateShopCart，这个方法加上async，返回的一定是一个Promise、
       // 要么成功|要么失败
-      const res =  this.$store.dispatch('addOrUpdateShopCart',{skuId:this.$route.params.skuid,skuNum:this.skuNum})
       // 2.服务器存储成功----进行路由跳转传递参数
+      try {
+        await this.$store.dispatch('addOrUpdateShopCart', {
+          skuId: this.$route.params.skuid,
+          skuNum: this.skuNum
+        });
+        // 路由跳转
+        // 路由跳转的时候将产品信息带给下一级的路由组件
+        //下面这种手段路由跳转以及传递参数可以，但是地址栏会比较复杂
+        // http://localhost:8080/#/addcartsuccess?skuInfo=%5Bobject%20Object%5D&skuNum=2
+        // this.$router.push({name:"addcartsuccess",query:{skuInfo:this.skuInfo,skuNum:this.skuNum}});
+        // 一些简单的数据skuNum,通过query形式给路由组件传递过去
+        // 产品的信息数据【比较复杂：skuInfo】,通过会话存储（不持久化，会话结束数据在消失）
+        // 本地存储|会话存储 一般存储字符串,将对象转换成字符串
+        sessionStorage.setItem("SKUINFO", JSON.stringify(this.skuInfo))
+        sessionStorage.setItem("ATTRINFO", JSON.stringify(this.attr))
+        this.$router.push({ name: "addcartsuccess", query: { skuNum: this.skuNum } });
+      } catch (error) {
+        alert(error.message)
+      }
       // 3.失败：给用户进行提示
     }
   },
@@ -402,6 +443,11 @@ export default {
     // console.log(this.$route.params);
     this.$store.dispatch("getGoodInfo", this.$route.params.skuid)
   },
+updated(){
+  this.attr.color = this.attrColor
+  this.attr.version = this.attrVersion
+
+}
 }
 </script>
 

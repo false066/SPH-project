@@ -5,6 +5,8 @@ import Register from "@/views/Register/index.vue"
 import Search from "@/views/Search/index.vue"
 import NotFound from '@/views/notfound/NotFound.vue'
 import Detail from '@/views/Detail/index.vue'
+import AddCartSuccess from '@/views/AddCartSuccess/index.vue'
+import ShopCart from '@/views/ShopCart/index.vue'
 // 配置路由信息
 export default [
   {
@@ -45,6 +47,18 @@ export default [
     path:'/detail/:skuid',
     name:'detail',
     component:Detail,
+    meta:{show:true}
+  },
+  {
+    path:'/shopcart',
+    name:'shopcart',
+    component:ShopCart,
+    meta:{show:true}
+  },
+  {
+    path:'/addcartsuccess',
+    name:'addcartsuccess',
+    component:AddCartSuccess,
     meta:{show:true}
   },
   // 重定向：在项目跑起来的时候，访问、，立马跳转到首页

@@ -1,9 +1,12 @@
 // home小仓库
 import { reqAddOrUpdateShopCart, reqGoodsInfo } from "@/api"
+import { getUUID } from "@/utils/uuid_token.js"
 // state:仓库储存数据的地方
 const state = {
   // state中数据默认初始值别瞎写，服务器返回对象，服务器返回数组。【根据接口返回值初始化】
   goodInfo:{},
+  // 游客临时身份
+  uuid_token:getUUID()
 
 }
 // mutations；修改state的唯一手段
@@ -27,12 +30,13 @@ const actions = {
     // 服务器写入数据成功，并没有返回其他数据，只返回了code==200，代表此次操作成功
     // 因为服务器没有返回其余数据，因此仓库不需要三连环存储数据
     const res = await reqAddOrUpdateShopCart({skuId,skuNum})
+    // console.log(res);
     if(res.code == 200){
       // 加入购物车成功
       return "ok"
     }else{
       // 加入购物车失败
-      return Promise.reject(new Error("失败"))
+      return Promise.reject(new Error(res.message))
     }
    }
 }

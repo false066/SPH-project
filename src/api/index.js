@@ -61,3 +61,10 @@ export const reqAddOrUpdateShopCart = ({skuId, skuNum}) =>{
     method:"POST",
   })
 }
+
+// 获取购物车列表 URL：/api/cart/cartList 请求方式：GET 参数：不需要参数
+export const reqCartList = () =>{
+  return requests({
+    url:'/cart/cartList'
+  })
+}
