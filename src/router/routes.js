@@ -12,6 +12,7 @@ export default [
   {
     path:'/home',
     component:Home,
+    name:'home',
     meta:{show:true}
   },
   {

@@ -2,6 +2,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import routes from "./routes";
+import store from  '@/store'
 // 使用插件
 Vue.use(VueRouter)
 
@@ -37,7 +38,7 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
 
 
 // 配置路由
-export default new VueRouter({
+let router = new VueRouter({
   // 配置路由
   
   routes,
@@ -47,3 +48,49 @@ export default new VueRouter({
     return { y: 0 }
   }
 })
+
+//全局守卫：前置守卫（路由跳转之前进行判断）
+router.beforeEach(async (to,from,next) =>{
+  // to:可以获取到你要跳转的那个路由信息
+  // from：可以获取到你从哪个路由而来的信息
+  // next：放行函数 next()放行 next(path)放行到指定路由 next(false)
+  // 为了测试先全部放行
+  // next()
+  // 用户登录了，才会有token，未登录一定不会有token
+  let token = store.state.user.token;
+  // 用户信息：不能用空对象去判断，因为当userInfo为空对象是也是true
+  // let userInfo = store.state.user.userInfo
+  let name = store.state.user.userInfo.name 
+  if(token){
+    // 如果用户登录了，还想去登录页，不能去还停留在首页
+    if(to.path == '/login' || to.path == '/register'){
+      next('/home');
+    }else{
+      // 登录，去的不是login【home|search|detail】
+      // 如果用户名已有
+      if(name){
+        next()
+      }else{
+        // 没有用户信息，派发action让仓库存储用户信息在跳转
+        try {
+          // 获取用户信息成功
+          // 在路由跳转之前获取用户信息
+          await store.dispatch('getUserInfo')
+          // 放行
+          next()
+        } catch (error) {
+          // token过期，获取不到用户信息，重新登陆
+          // 清除token
+          await store.dispatch('userLogout')
+          next('/login')
+        }
+      }
+    }
+  }else{
+    // 未登录暂时没有处理完毕，后期处理
+    next()
+  }
+})
+
+
+export default router

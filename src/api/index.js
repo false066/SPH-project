@@ -68,3 +68,59 @@ export const reqCartList = () =>{
     url:'/cart/cartList'
   })
 }
+
+// 删除某一个商品 URL：/api/cart/deleteCart/{skuId} 请求方式：DELETE 参数：需要参数
+export const reqDeleteCartById = (skuId) =>{
+  return requests({
+    url:`/cart/deleteCart/${skuId}`,
+    method:'DELETE'
+  })
+}
+
+// 修改商品选中的状态 URL:/api/cart/checkCart/{skuID}/{isChecked} 请求方式：GET 参数：需要参数
+export const reqUpdateCheckedById = ({skuId,isChecked}) =>{
+  return requests({
+    url:`/cart/checkCart/${skuId}/${isChecked}`
+  })
+}
+
+// 获取验证码 URL：/api/user/passport/sendCode/{phone} 请求方式：GET 参数：需要参数
+export const reqGetCode = ({ commit },phone) =>{
+  return requests({
+    url:`/user/passport/sendCode/${phone}`
+  })
+}
+
+// 用户注册 URL:/api/user/passport/register 请求方式：POST 参数：需要参数
+export const reqUserRegister = (data) => {
+  return requests({
+    url:'/user/passport/register',
+    method:"POST",
+    data,
+  })
+}
+
+// 用户登录URL:/api/user/passport/login 请求方式：POST 参数：需要参数 phone，password
+export const reqUserLogin = (data) => {
+  return requests({
+    url:'/user/passport/login',
+    method:"POST",
+    data,
+  })
+}
+
+// 获取用户信息【需要带着用户的token向服务器要用户信息】
+// URL：/api/user/passport/auth/getUserInfo 请求方式：get 参数：不需要参数
+export const reqUserInfo = () => {
+  return requests({
+    url:'/user/passport/auth/getUserInfo'
+  })
+}
+
+//退出登录
+// URL：/api/user/passport/logout 请求方式：get 参数：不需要参数
+export const reqLogout = () => {
+  return requests({
+    url:'/user/passport/logout'
+  })
+}

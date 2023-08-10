@@ -24,6 +24,11 @@ requests.interceptors.request.use((config) => {
     // console.log(store.state.detail.uuid_token);
     config.headers.userTempId = store.state.detail.uuid_token
   }
+  //token[公共参数]
+
+  if(store.state.user.token){
+    config.headers.token = store.state.user.token;
+}
   return config;
 }, (error) => {
   return Promise.reject(error);
