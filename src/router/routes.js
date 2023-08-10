@@ -7,12 +7,19 @@ import NotFound from '@/views/notfound/NotFound.vue'
 import Detail from '@/views/Detail/index.vue'
 import AddCartSuccess from '@/views/AddCartSuccess/index.vue'
 import ShopCart from '@/views/ShopCart/index.vue'
+import Trade from '@/views/Trade/index.vue'
 // 配置路由信息
 export default [
   {
     path:'/home',
     component:Home,
     name:'home',
+    meta:{show:true}
+  },
+  {
+    path:'/trade',
+    component:Trade,
+    name:'trade',
     meta:{show:true}
   },
   {

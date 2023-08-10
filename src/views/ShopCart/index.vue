@@ -64,7 +64,7 @@
             <i class="summoney">{{ totalPrice.toFixed(2) }}</i>
           </div>
           <div class="sumbtn">
-            <a class="sum-btn" href="###">结算</a>
+            <a class="sum-btn" @click="$router.push('/trade')">结算</a>
           </div>
         </div>
       </div>

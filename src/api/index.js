@@ -124,3 +124,20 @@ export const reqLogout = () => {
     url:'/user/passport/logout'
   })
 }
+
+
+// 获取用户地址信息
+// URL：/api/user/userAddress/auth/findUserAddressList 请求方式：get 参数：不需要参数
+export const reqAddressInfo = () =>{
+  return requests({
+    url:'/user/userAddress/auth/findUserAddressList'
+  })
+}
+
+// 获取商品清单
+// URL：/api/order/auth/trade 请求方式：get  参数：不需要参数
+export const reqOrderInfo = () =>{
+  return requests({
+    url:'/order/auth/trade'
+  })
+}

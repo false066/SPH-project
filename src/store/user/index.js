@@ -64,9 +64,9 @@ const actions = {
       setToken(res.data.token)
       return 'ok'
     }
-    // else {
-    //   return Promise.reject(new Error('登录失败'))
-    // }
+    else {
+      return Promise.reject(new Error('登录失败'))
+    }
   },
   // 获取用户信息
   async getUserInfo({ commit },){
@@ -77,9 +77,9 @@ const actions = {
       commit('GETUSERINFO',res.data)
       return 'ok'
     }
-    // else{
-    //   return Promise.reject(new Error('获取失败'))
-    // }
+    else{
+      return Promise.reject(new Error('获取失败'))
+    }
   },
   // 退出登录
   async userLogout({commit}){
